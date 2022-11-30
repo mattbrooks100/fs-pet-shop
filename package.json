@@ -1,5 +1,6 @@
 {
   "name": "fs-pet-store",
+  "type": "module",
   "version": "0.1.0",
   "description": "A small server app to demonstrate CRUD over an HTTP API",
   "main": "restfulExpressServer.js",
