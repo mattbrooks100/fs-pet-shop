@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 3000;
 // Parse the HTTP request body
 app.use(express.json());
 // Morgan middleware logs each HTTP request
-app.use(morgan("combined"));
+app.use(morgan("tiny"));
 //===========================================================//
 
 // GET all pets
