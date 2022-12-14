@@ -1,7 +1,6 @@
 //========================== SETUP ==========================//
 // Import dependencies
 import express from "express";
-import { readFile, writeFile } from "fs/promises";
 import morgan from "morgan";
 import postgres from "postgres";
 // Initialize express
@@ -19,8 +18,8 @@ const sql = postgres({ database: "petshop" });
 // GET - read all pets
 app.get("/pets", (req, res, next) => {
   sql`SELECT * FROM pets`
-    .then((text) => {
-      res.send(text);
+    .then((result) => {
+      res.json(result);
     })
     .catch(next);
 });
@@ -57,41 +56,47 @@ app.post("/pets", (req, res, next) => {
 app.patch("/pets/:id", (req, res, next) => {
   const { id } = req.params;
   const { age, name, kind } = req.body;
-  // Update age if it is defined and an integer
-  if (Number.isInteger(age)) {
-    sql`UPDATE pets SET age = ${age} WHERE id = ${id} RETURNING *`
-      .then((result) => {
-        if (result.length === 0) {
-          res.status(404).set("Content-Type", "text/plain").send("Not Found: id out of bounds");
-        } else {
-          res.status(201).json(result[0]);
-        }
-      })
-      .catch(next);
-    // Update name if it's a string
-  } else if (typeof name === "string") {
-    sql`UPDATE pets SET name = ${name} WHERE id = ${id} RETURNING *`
-      .then((result) => {
-        if (result.length === 0) {
-          res.status(404).set("Content-Type", "text/plain").send("Not Found: id out of bounds");
-        } else {
-          res.status(201).json(result[0]);
-        }
-      })
-      .catch(next);
-    // Update kind if it's a string
-  } else if (typeof kind === "string") {
-    sql`UPDATE pets SET kind = ${kind} WHERE id = ${id} RETURNING *`
-      .then((result) => {
-        if (result.length === 0) {
-          res.status(404).set("Content-Type", "text/plain").send("Not Found: id out of bounds");
-        } else {
-          res.status(201).json(result[0]);
-        }
-      })
-      .catch(next);
-  }
+  sql`UPDATE pets SET ${sql(req.body)} WHERE id=${id} RETURNING *`
+    .then((result) => {
+      res.send(result[0]);
+    })
+    .catch(next);
 });
+//   // Update age if it is an integer
+//   if (Number.isInteger(age)) {
+//     sql`UPDATE pets SET age = ${age} WHERE id = ${id} RETURNING *`
+//       .then((result) => {
+//         if (result.length === 0) {
+//           res.status(404).set("Content-Type", "text/plain").send("Not Found: id out of bounds");
+//         } else {
+//           res.status(201).json(result[0]);
+//         }
+//       })
+//       .catch(next);
+//     // Update name if it's a string
+//   } else if (typeof name === "string") {
+//     sql`UPDATE pets SET name = ${name} WHERE id = ${id} RETURNING *`
+//       .then((result) => {
+//         if (result.length === 0) {
+//           res.status(404).set("Content-Type", "text/plain").send("Not Found: id out of bounds");
+//         } else {
+//           res.status(201).json(result[0]);
+//         }
+//       })
+//       .catch(next);
+//     // Update kind if it's a string
+//   } else if (typeof kind === "string") {
+//     sql`UPDATE pets SET kind = ${kind} WHERE id = ${id} RETURNING *`
+//       .then((result) => {
+//         if (result.length === 0) {
+//           res.status(404).set("Content-Type", "text/plain").send("Not Found: id out of bounds");
+//         } else {
+//           res.status(201).json(result[0]);
+//         }
+//       })
+//       .catch(next);
+//   }
+// });
 
 // DELETE - removes a pet
 app.delete("/pets/:id", (req, res, next) => {
@@ -106,7 +111,6 @@ app.delete("/pets/:id", (req, res, next) => {
     })
     .catch(next);
 });
-
 //===========================================================//
 
 //====================== ERROR HANDLING =====================//
